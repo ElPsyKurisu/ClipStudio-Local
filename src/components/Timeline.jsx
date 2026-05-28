@@ -105,6 +105,30 @@ export default function Timeline({
     };
   }, [isDraggingPlayhead, dragInfo, timelineZoom]);
 
+  // Handle wheel events for horizontal scrolling and Ctrl+Wheel zooming
+  useEffect(() => {
+    const board = tracksBodyRef.current;
+    if (!board) return;
+
+    const handleWheel = (e) => {
+      if (e.ctrlKey) {
+        // Ctrl + Wheel: Zoom in/out
+        e.preventDefault();
+        const zoomDelta = e.deltaY < 0 ? 0.01 : -0.01;
+        setTimelineZoom(prev => Math.max(0.01, Math.min(0.2, prev + zoomDelta)));
+      } else {
+        // Regular Wheel: Pan/Scroll Horizontally
+        e.preventDefault();
+        board.scrollLeft += e.deltaY + e.deltaX;
+      }
+    };
+
+    board.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      board.removeEventListener('wheel', handleWheel);
+    };
+  }, [setTimelineZoom]);
+
   // Split and Delete key hotkeys mapping
   useEffect(() => {
     const handleKeyDown = (e) => {

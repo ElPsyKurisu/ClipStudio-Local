@@ -208,8 +208,13 @@ export default function App() {
 
   // Add media directly to active playhead scrubber
   const handleAddMediaToTimeline = (media) => {
-    // Find next end coordinate on timeline
+    // Prevent stacking: append to the end of the existing timeline if clips are present
     let timelineStart = currentTime;
+    if (clips.length > 0) {
+      const maxEnd = Math.max(...clips.map(c => c.timelineEnd));
+      timelineStart = maxEnd;
+    }
+
     const duration = media.duration;
     const timelineEnd = timelineStart + duration;
 
